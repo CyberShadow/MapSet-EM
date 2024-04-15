@@ -70,5 +70,26 @@ struct VLA(Index, Item)
 
 unittest
 {
-	VLA!(uint, uint) _;
+	import ae.sys.cmd : getTempFileName;
+	import std.file : mkdir, rmdirRecurse;
+	auto dir = getTempFileName("test");
+	mkdir(dir);
+	scope(exit) rmdirRecurse(dir);
+
+	{
+		auto a = VLA!(uint, uint)(dir ~ "/test");
+		assert(a.length == 0);
+		*a.allocate.ptr = 1;
+		assert(a.length == 1);
+		a.allocate(100);
+		assert(a.length == 101);
+		a[17] = 42;
+	}
+
+	{
+		auto a = VLA!(uint, uint)(dir ~ "/test");
+		assert(a.length == 101);
+		assert(a[0] == 1);
+		assert(a[17] == 42);
+	}
 }

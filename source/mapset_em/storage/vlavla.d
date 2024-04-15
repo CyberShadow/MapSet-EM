@@ -21,6 +21,8 @@ struct VLAVLA(Index, size_t offsetBits, Element = ubyte)
 		data = typeof(data)(name ~ ".data");
 	}
 
+	@property Index length() { return index.length; }
+
 	Element[] opIndex(Index i)
 	{
 		Offset start = index[i];
@@ -41,5 +43,23 @@ struct VLAVLA(Index, size_t offsetBits, Element = ubyte)
 
 unittest
 {
-	VLAVLA!(uint, 32) _;
+	import ae.sys.cmd : getTempFileName;
+	import std.file : mkdir, rmdirRecurse;
+	auto dir = getTempFileName("test");
+	mkdir(dir);
+	scope(exit) rmdirRecurse(dir);
+
+	{
+		auto a = VLAVLA!(uint, 32)(dir ~ "/test");
+		assert(a.length == 0);
+		a.allocate(3).item[] = [1, 2, 3];
+		assert(a.length == 1);
+		a[0][1] = 42;
+	}
+
+	{
+		auto a = VLAVLA!(uint, 32)(dir ~ "/test");
+		assert(a.length == 1);
+		assert(a[0] == [1, 42, 3]);
+	}
 }

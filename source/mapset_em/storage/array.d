@@ -32,5 +32,19 @@ struct Array(Index, Item)
 
 unittest
 {
-	Array!(uint, uint) _;
+	import ae.sys.cmd : getTempFileName;
+	import std.file : mkdir, rmdirRecurse;
+	auto dir = getTempFileName("test");
+	mkdir(dir);
+	scope(exit) rmdirRecurse(dir);
+
+	{
+		auto a = Array!(uint, uint)(dir ~ "/test");
+		a[17] = 42;
+	}
+
+	{
+		auto a = Array!(uint, uint)(dir ~ "/test");
+		assert(a[17] == 42);
+	}
 }

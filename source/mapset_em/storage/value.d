@@ -24,5 +24,21 @@ struct Value(S)
 
 unittest
 {
-	Value!uint _;
+	import ae.sys.cmd : getTempFileName;
+	import std.file : mkdir, rmdirRecurse;
+	auto dir = getTempFileName("test");
+	mkdir(dir);
+	scope(exit) rmdirRecurse(dir);
+
+	struct S { int i; }
+
+	{
+		auto a = Value!S(dir ~ "/test");
+		a.i = 42;
+	}
+
+	{
+		auto a = Value!S(dir ~ "/test");
+		assert(a.i == 42);
+	}
 }
